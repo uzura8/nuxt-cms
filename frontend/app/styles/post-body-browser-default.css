@@ -1,0 +1,88 @@
+/* 投稿本文（v-html）内の最低限のタイポグラフィ */
+/* 移植元: _reference_vue_src/styles/browser-default.scss */
+
+.post-body h1,
+.post-body h2,
+.post-body h3,
+.post-body h4,
+.post-body h5,
+.post-body h6 {
+  display: block;
+  font-weight: bold;
+}
+
+.post-body h1 {
+  margin: 0.67em 0;
+  font-size: 2em;
+}
+
+.post-body h2 {
+  margin: 0.83em 0;
+  font-size: 1.5em;
+}
+
+.post-body h3 {
+  margin: 1em 0;
+  font-size: 1.17em;
+}
+
+.post-body h4 {
+  margin: 1.12em 0;
+}
+
+.post-body h5 {
+  font-size: 0.83em;
+  margin: 1.5em 0;
+}
+
+.post-body h6 {
+  font-size: 0.75em;
+  margin: 1.67em 0;
+}
+
+.post-body ul {
+  margin: 1em 0;
+  padding-left: 40px;
+  list-style: disc;
+  list-style-type: disc;
+  list-style-position: outside;
+}
+
+.post-body ol {
+  margin: 1em 0;
+  padding-left: 40px;
+  list-style-type: decimal;
+}
+
+.post-body li {
+  display: list-item;
+}
+
+.post-body dl {
+  display: block;
+  margin: 1em 0;
+}
+
+.post-body dt {
+  display: block;
+}
+
+.post-body dd {
+  display: block;
+  margin-left: 40px;
+}
+
+.post-body p {
+  margin-top: 0;
+}
+
+.post-body pre {
+  margin-bottom: 10px;
+  padding: 0;
+}
+
+.post-body table td,
+.post-body table th {
+  border: 1px solid #ddd;
+  padding: 5px;
+}

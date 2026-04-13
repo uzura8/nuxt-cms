@@ -1,0 +1,9 @@
+# 参照用ソースはインデックス対象から外す
+frontend/_reference_vue_src/
+
+# 大きいが参照価値の低い生成物
+node_modules/
+.nuxt/
+.output/
+dist/
+coverage/

@@ -1,0 +1,27 @@
+# Cursor から触らせたくないもの
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.log
+
+# 生成物・キャッシュ
+node_modules/
+.nuxt/
+.output/
+dist/
+coverage/
+.cache/
+.tmp/
+temp/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Git / CI
+.git/

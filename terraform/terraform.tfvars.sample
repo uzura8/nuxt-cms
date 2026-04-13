@@ -1,0 +1,90 @@
+# Terraform variable definitions
+
+# Project settings
+project = "pal-items"
+stage   = "dev"
+
+# Region settings
+region_api         = "ap-northeast-1"
+region_site        = "ap-northeast-1"
+region_acm         = "us-east-1"
+region_lambda_edge = "us-east-1"
+
+# Network settings
+vpc_cidr = "10.50.0.0/16"
+
+# =========================
+# DB (Aurora MySQL)
+# =========================
+
+# DB 接続情報
+db_username = "your-user-name"
+db_password = "your-db-password" # 指定しない場合は random_password を採用
+# db_password = null # 指定しない場合は random_password を採用
+db_name = "db_name"
+db_port = 3306
+
+# KMS（Secrets Manager をCMKで暗号化したい時だけ指定。通常は null でOK）
+secrets_kms_key_arn = null
+
+# Engine version（固定したい時だけ指定。固定しないなら null）
+db_engine_version = "8.0.mysql_aurora.3.10.3"
+
+# Aurora instance settings
+db_instance_class = "db.t4g.medium"
+db_instance_count = 1 # インスタンス数
+
+# Backup/保護設定
+db_backup_retention_period  = 1     # 本番では 7 にする
+db_deletion_protection      = false # DB保護設定: 本番ではtrueにする
+db_backtrack_window_seconds = 0     # バックトラック設定: 秒で指定する(0 で無効), 本番では 3600 (1H) にする
+
+# CloudWatch Logs exports
+db_enabled_cloudwatch_logs_exports = ["error", "slowquery"]
+# db_enabled_cloudwatch_logs_exports = ["error", "slowquery", "general"] # For development
+
+# =========================
+# RDS Proxy
+# =========================
+db_proxy_require_tls = true
+
+# （任意）CSV格納など、名前を変えたい場合は module/定義側に variable を足して指定
+# csv_bucket_name = "survlog-dev-csv-bucket"
+
+
+# =========================
+# DB Admin EC2
+# ========================
+ec2_admin_instance_type = "t3.micro"
+ec2_admin_volume_size   = 20 # GB
+#ec2_admin_ami_ssm_parameter = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+
+ec2_admin_ssh_ingress_cidrs = [] # SSM を使う場合は空リストでよい
+# ec2_admin_ssh_ingress_cidrs = [
+#   "xxx.xxx.xxx.xxx/32", # 接続を許可するIPアドレス
+# ]
+
+ec2_admin_key_name = null # 既存の key pair を使う場合は指定
+
+# Secrets Manager の DB secret を EC2 から読みたい場合のみ true
+ec2_admin_allow_read_db_secret = true
+
+# =========================
+# Domain
+# ========================
+route53_zone_id              = "ZXXXXXXXXXXXXXXXXXXXX"
+domain_api                   = "app-dev.example.com"
+domain_static_site           = "www.example.com"
+s3_static_site_force_destroy = true # 本番では false にする
+
+# =========================
+# Share Bucket
+# ========================
+file_share_bucket_name = "file-share-dev.example.com"
+#file_share_bucket_path = "shop/item-tag"
+
+# =========================
+# Item Importer Ref Bucket
+# ========================
+item_importer_bucket_name = "palrel-data-resources"
+

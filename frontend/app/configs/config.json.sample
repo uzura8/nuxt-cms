@@ -1,0 +1,27 @@
+{
+  "site": {
+    "name": "Sample Site",
+    "caption": "This site is a sample site",
+    "footerRight": "&copy;Your Organization. 2023. All rights reserved.",
+    "baseUrl": "http://example.com"
+  },
+  "common": {
+    "loadingTimeoutThreshold": 10000,
+    "pagerCount": 20
+  },
+  "firebase": {
+    "allowedDomains": []
+  },
+  "api": {
+    "origin": "https://example.com",
+    "basePath": "/api/v1"
+  },
+  "media": {
+    "url": "https://pscms-v2-media-dev.palr.link"
+  },
+  "post": {
+    "serviceId": "your-service-id",
+    "listImageSize": "400x400xs",
+    "ogpImageSize": "800x800"
+  }
+}

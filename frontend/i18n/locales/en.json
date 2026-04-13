@@ -1,0 +1,51 @@
+{
+  "common": {
+    "item": "Item",
+    "items": "Items",
+    "this": "This",
+    "thisOf": "This {label}",
+    "yes": "Yes",
+    "no": "No",
+    "cancel": "Cancel",
+    "save": "Save",
+    "addNew": "Add new",
+    "delete": "Delete",
+    "clear": "Clear",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "publishAt": "Published",
+    "category": "Category",
+    "tag": "Tag",
+    "tags": "Tags",
+    "tagsShort": "Tags",
+    "loading": "Loading...",
+    "showMore": "Show more",
+    "confirmationOf": "Confirmation of {label}"
+  },
+  "page": {
+    "top": {
+      "title": "Top",
+      "description": "Welcome to the sample site."
+    },
+    "about": {
+      "title": "About this site",
+      "description": "Learn about this site."
+    },
+    "posts": {
+      "list": {
+        "title": "Posts",
+        "description": "Browse posts."
+      },
+      "detail": {
+        "title": "Post",
+        "loadingTitle": "Loading post content.",
+        "loadingDescription": "Loading post content."
+      }
+    }
+  },
+  "message": {
+    "fetchFailed": "Failed to load the list.",
+    "noData": "No data",
+    "confirmToDeleteFor": "Are you sure you want to delete {label}?"
+  }
+}

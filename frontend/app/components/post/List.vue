@@ -1,0 +1,79 @@
+<script setup lang="ts">
+import type { CategoryPublic } from '@/types/Category'
+import { linkClass } from '@/utils/styles'
+
+const props = withDefaults(
+  defineProps<{
+    serviceId: string
+    categorySlug?: string
+    tagLabel?: string
+    /** 1 ページあたり件数。未指定なら API デフォルト */
+    count?: number
+  }>(),
+  {
+    serviceId: '',
+    categorySlug: '',
+    tagLabel: ''
+  }
+)
+
+const emits = defineEmits<{
+  (e: 'updateCategory', category: CategoryPublic): void
+}>()
+
+const { posts, hasNext, isLoading, isAppending, error, loadMore } = usePostsList({
+  serviceId: () => props.serviceId,
+  categorySlug: () => props.categorySlug,
+  tagLabel: () => props.tagLabel,
+  count: () => props.count,
+  onMetaCategory: (category) => emits('updateCategory', category)
+})
+</script>
+
+<template>
+  <div>
+    <p
+      v-if="error"
+      class="text-red-600 text-center text-sm mb-4"
+    >
+      {{ $t('message.fetchFailed') }}
+    </p>
+
+    <p
+      v-else-if="isLoading && posts.length === 0"
+      class="text-gray-500 text-center py-8"
+    >
+      {{ $t('common.loading') }}
+    </p>
+
+    <div
+      v-else-if="posts.length"
+      class="grid grid-cols-1 gap-6"
+    >
+      <PostListItem
+        v-for="(post, index) in posts"
+        :key="post.postId"
+        :post="post"
+        :preload-lcp="index === 0"
+      />
+      <div
+        v-if="hasNext"
+        class="text-center"
+      >
+        <button
+          type="button"
+          :disabled="isAppending"
+          :class="linkClass()"
+          class="text-lg lg:text-xl block w-full py-2 hover:bg-gray-50"
+          @click="loadMore"
+        >
+          {{ isAppending ? $t('common.loading') : $t('common.showMore') }}
+        </button>
+      </div>
+    </div>
+
+    <div v-else-if="!isLoading">
+      <p class="text-gray-500 text-center">{{ $t('message.noData') }}</p>
+    </div>
+  </div>
+</template>

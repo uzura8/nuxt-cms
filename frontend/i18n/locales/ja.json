@@ -1,0 +1,50 @@
+{
+  "common": {
+    "item": "項目",
+    "items": "項目",
+    "this": "これ",
+    "thisOf": "この{label}",
+    "yes": "はい",
+    "no": "いいえ",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "addNew": "新規追加",
+    "delete": "削除",
+    "clear": "クリア",
+    "createdAt": "作成日時",
+    "updatedAt": "更新日時",
+    "publishAt": "公開日時",
+    "category": "カテゴリー",
+    "tag": "タグ",
+    "tags": "タグ一覧",
+    "tagsShort": "タグ",
+    "loading": "読み込み中...",
+    "showMore": "もっと見る",
+    "confirmationOf": "{label}の確認"
+  },
+  "page": {
+    "top": {
+      "title": "トップ",
+      "description": "サンプルサイトのトップページです。"
+    },
+    "about": {
+      "title": "このサイトについて",
+      "description": "このサイトの概要を説明します。"
+    },
+    "posts": {
+      "list": {
+        "title": "投稿一覧",
+        "description": "投稿の一覧です。"
+      },
+      "detail": {
+        "loadingTitle": "投稿の内容を読み込んでいます。",
+        "loadingDescription": "投稿の内容を読み込んでいます。"
+      }
+    }
+  },
+  "message": {
+    "fetchFailed": "一覧の取得に失敗しました。",
+    "noData": "データがありません。",
+    "confirmToDeleteFor": "{label}を削除してもよろしいですか？"
+  }
+}

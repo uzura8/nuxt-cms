@@ -39,6 +39,19 @@ jobs:
         with:
           version: 10
 
+      - name: Download app config from S3 (frontend)
+        env:
+          S3_CONFIG_BUCKET_DEV: ${{ vars.S3_CONFIG_BUCKET_DEV }}
+          S3_CONFIG_BUCKET: ${{ vars.S3_CONFIG_BUCKET }}
+        run: |
+          cd frontend
+          if [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+            BUCKET="${S3_CONFIG_BUCKET}"
+          else
+            BUCKET="${S3_CONFIG_BUCKET_DEV}"
+          fi
+          aws s3 cp "s3://${BUCKET}/config.json" "app/configs/config.json" --quiet
+
       - name: Install dependencies (frontend)
         run: |
           cd frontend

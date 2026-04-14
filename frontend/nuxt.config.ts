@@ -1,5 +1,5 @@
 // nuxt.config.ts
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -9,8 +9,15 @@ import { siteHeadTitleLine } from './app/lib/siteHead'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
-const appConfigPath = join(dirname(fileURLToPath(import.meta.url)), 'app/configs/config.json')
-const appConfig = JSON.parse(readFileSync(appConfigPath, 'utf8')) as {
+const appConfigDir = join(dirname(fileURLToPath(import.meta.url)), 'app/configs')
+const appConfigPath = join(appConfigDir, 'config.json')
+const appConfigSamplePath = join(appConfigDir, 'config.json.sample')
+
+const appConfigRaw = existsSync(appConfigPath)
+  ? readFileSync(appConfigPath, 'utf8')
+  : readFileSync(appConfigSamplePath, 'utf8')
+
+const appConfig = JSON.parse(appConfigRaw) as {
   site: { name: string; title?: string; caption?: string; baseUrl: string }
   media: { url: string }
 }

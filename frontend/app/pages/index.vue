@@ -51,7 +51,7 @@ const { count, countUp, countDown, resetCount } = counterState
     </div>
     <div>
       <img
-        src="~/assets/km-001.jpg"
+        src="~/assets/km-001.JPG"
         alt="コムギの写真"
         width="300"
       />

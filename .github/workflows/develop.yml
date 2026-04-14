@@ -35,8 +35,8 @@ jobs:
           S3_CONFIG_BUCKET: ${{ vars.S3_CONFIG_BUCKET_DEV }}
         run: |
           cd frontend
-          aws s3 cp s3://$S3_CONFIG_BUCKET_DEV/config.json ./src/configs/ --quiet
-          aws s3 cp s3://$S3_CONFIG_BUCKET_DEV/firebase-app-sdk-config.json ./src/configs/ --quiet
+          aws s3 cp s3://$S3_CONFIG_BUCKET/config.json ./app/configs/config.json --quiet
+          aws s3 cp s3://$S3_CONFIG_BUCKET/firebase-app-sdk-config.json ./app/configs/firebase-app-sdk-config.json --quiet
         # run: |
         #   cd frontend
         #   aws s3 cp s3://$S3_CONFIG_BUCKET/config.json ./src/configs/ --quiet

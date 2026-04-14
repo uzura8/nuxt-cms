@@ -1,0 +1,13 @@
+{
+  "name": "nuxt-ssr-serverless",
+  "private": true,
+  "scripts": {
+    "build:nuxt": "cd ../../frontend && pnpm run build",
+    "sync:nitro": "bash scripts/sync-nitro-bundle.sh",
+    "package": "pnpm run sync:nitro && serverless package",
+    "deploy": "pnpm run build:nuxt && pnpm run sync:nitro && serverless deploy"
+  },
+  "devDependencies": {
+    "serverless": "^4.4.0"
+  }
+}

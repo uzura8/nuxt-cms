@@ -1,0 +1,42 @@
+# Nuxt Nitro (aws_lambda preset) を Lambda に載せる Serverless Framework v4 サービス。
+# CloudFront 等のオリジンは Terraform 側で、この HTTP API または将来の Function URL を指す想定。
+service: nuxt-ssr
+
+build:
+  # Nitro が既にバンドル済みのため v4 標準 esbuild で再バンドルしない
+  esbuild: false
+
+stages:
+  default:
+    params: {}
+  prod:
+    params: {}
+  # 例: Terraform state 連携は stages.default.resolvers.terraform 等で後から追加
+
+provider:
+  name: aws
+  runtime: nodejs24.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'ap-northeast-1'}
+  httpApi:
+    cors: true
+
+package:
+  patterns:
+    - "!**"
+    - ".nitro-bundle/**"
+
+functions:
+  nuxtSsr:
+    handler: index.handler
+    description: Nuxt Nitro SSR on Lambda
+    environment:
+      NUXT_PUBLIC_SITE_URL: ${env:NUXT_PUBLIC_SITE_URL, ''}
+      NUXT_PUBLIC_SITE_NAME: ${env:NUXT_PUBLIC_SITE_NAME, ''}
+    events:
+      - httpApi:
+          path: /
+          method: "*"
+      - httpApi:
+          path: /{proxy+}
+          method: "*"

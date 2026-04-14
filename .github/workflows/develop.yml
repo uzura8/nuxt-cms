@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [24.x]
 
     steps:
       - name: Checkout
@@ -30,7 +30,6 @@ jobs:
       #   run: |
       #     cd frontend
       #     cp ./src/configs/config-dev.json ./src/configs/config.json
-
       - name: Download config file from S3
         env:
           S3_CONFIG_BUCKET: ${{ vars.S3_CONFIG_BUCKET_DEV }}

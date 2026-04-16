@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials from account
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -29,25 +29,19 @@ jobs:
       - name: Download config file from S3
         env:
           S3_CONFIG_BUCKET: ${{ vars.S3_CONFIG_BUCKET }}
-        # run: |
-        #   cd frontend
-        #   set -euo pipefail
-        #   mkdir -p ./app/configs
-
-        #   echo "S3_CONFIG_BUCKET=s3://${S3_CONFIG_BUCKET}/"
-        #   aws s3 ls "s3://${S3_CONFIG_BUCKET}/" || true
-
-        #   aws s3 cp "s3://${S3_CONFIG_BUCKET}/config.json" "./app/configs/config.json" --no-progress
         run: |
+          set -euo pipefail
           cd frontend
+          mkdir -p ./app/configs
+
+          echo "S3_CONFIG_BUCKET=s3://${S3_CONFIG_BUCKET}/"
+          aws s3 ls "s3://${S3_CONFIG_BUCKET}/" || true
+
           aws s3 cp "s3://${S3_CONFIG_BUCKET}/config.json" "./app/configs/config.json" --no-progress
-        # run: |
-        #   cd frontend
-        #  aws s3 cp "s3://${S3_CONFIG_BUCKET}/config.json" "./app/configs/config.json" --quiet
-        #  aws s3 cp "s3://${S3_CONFIG_BUCKET}/firebase-app-sdk-config.json" "./app/configs/firebase-app-sdk-config.json" --quiet
+          aws s3 cp "s3://${S3_CONFIG_BUCKET}/firebase-app-sdk-config.json" "./app/configs/firebase-app-sdk-config.json" --no-progress
 
       - name: Build by Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - run: |
@@ -58,15 +52,10 @@ jobs:
       - name: Sync Files to s3
         env:
           S3_RESOURCE_BUCKET: ${{ vars.S3_RESOURCE_BUCKET }}
-        # run: |
-        #   set -euo pipefail
-        #   mkdir -p ./app/configs
-
-        #   echo "S3_RESOURCE_BUCKET=s3://${S3_RESOURCE_BUCKET}/"
-        #   cd frontend
-        #   aws s3 sync ./.output/public "s3://${S3_RESOURCE_BUCKET}"
         run: |
+          set -euo pipefail
           cd frontend
+          echo "S3_RESOURCE_BUCKET=s3://${S3_RESOURCE_BUCKET}/"
           aws s3 sync ./.output/public "s3://${S3_RESOURCE_BUCKET}"
 
       # Clear CloudFront Caches

@@ -29,18 +29,18 @@ jobs:
       - name: Download config file from S3
         env:
           S3_CONFIG_BUCKET: ${{ vars.S3_CONFIG_BUCKET_DEV }}
-        # run: |
-        #   set -euo pipefail
-        #   mkdir -p ./app/configs
-
-        #   echo "S3_CONFIG_BUCKET_DEV=s3://${S3_CONFIG_BUCKET_DEV}/"
-        #   aws s3 ls "s3://${S3_CONFIG_BUCKET_DEV}/" || true
-
-        #   cd frontend
-        #   aws s3 cp "s3://${S3_CONFIG_BUCKET_DEV}/config.json" "./app/configs/config.json" --no-progress
         run: |
+          set -euo pipefail
+          mkdir -p ./app/configs
+
+          echo "S3_CONFIG_BUCKET_DEV=s3://${S3_CONFIG_BUCKET_DEV}/"
+          aws s3 ls "s3://${S3_CONFIG_BUCKET_DEV}/" || true
+
           cd frontend
           aws s3 cp "s3://${S3_CONFIG_BUCKET_DEV}/config.json" "./app/configs/config.json" --no-progress
+        # run: |
+        #   cd frontend
+        #   aws s3 cp "s3://${S3_CONFIG_BUCKET_DEV}/config.json" "./app/configs/config.json" --no-progress
         # run: |
         #   cd frontend
         #  aws s3 cp "s3://${S3_CONFIG_BUCKET_DEV}/config.json" "./app/configs/config.json" --quiet

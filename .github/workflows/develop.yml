@@ -29,19 +29,18 @@ jobs:
       - name: Download config file from S3
         env:
           S3_CONFIG_BUCKET: ${{ vars.S3_CONFIG_BUCKET_DEV }}
-        # run: |
-        #   cd frontend
-        #   set -euo pipefail
-        #   mkdir -p ./app/configs
-
-        #   echo "S3_CONFIG_BUCKET=s3://${S3_CONFIG_BUCKET}/"
-        #   aws s3 ls "s3://${S3_CONFIG_BUCKET}/" || true
-
-        #   aws s3 cp "s3://${S3_CONFIG_BUCKET}/config.json" "./app/configs/config.json" --no-progress
-        #   aws s3 cp "s3://${S3_CONFIG_BUCKET}/firebase-app-sdk-config.json" "./app/configs/firebase-app-sdk-config.json" --no-progress
         run: |
           cd frontend
-          aws s3 cp s3://$S3_CONFIG_BUCKET_DEV/config.json ./app/configs/ --quiet
+          set -euo pipefail
+          mkdir -p ./app/configs
+
+          echo "S3_CONFIG_BUCKET=s3://${S3_CONFIG_BUCKET}/"
+          aws s3 ls "s3://${S3_CONFIG_BUCKET}/" || true
+
+          aws s3 cp "s3://${S3_CONFIG_BUCKET}/config.json" "./app/configs/config.json" --no-progress
+        # run: |
+        #   cd frontend
+        #   aws s3 cp s3://$S3_CONFIG_BUCKET_DEV/config.json ./app/configs/ --quiet
         # run: |
         #   cd frontend
         #   aws s3 cp s3://$S3_CONFIG_BUCKET/config.json ./app/configs/config.json --quiet

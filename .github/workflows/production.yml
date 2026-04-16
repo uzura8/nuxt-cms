@@ -38,7 +38,6 @@ jobs:
         #   aws s3 ls "s3://${S3_CONFIG_BUCKET}/" || true
 
         #   aws s3 cp "s3://${S3_CONFIG_BUCKET}/config.json" "./app/configs/config.json" --no-progress
-        #   aws s3 cp "s3://${S3_CONFIG_BUCKET}/firebase-app-sdk-config.json" "./app/configs/firebase-app-sdk-config.json" --no-progress
         run: |
           cd frontend
           aws s3 cp s3://$S3_CONFIG_BUCKET/config.json ./app/configs/config.json --quiet

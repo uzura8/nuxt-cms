@@ -36,9 +36,7 @@ jobs:
 
           echo "S3_CONFIG_BUCKET=s3://${S3_CONFIG_BUCKET}/"
           aws s3 ls "s3://${S3_CONFIG_BUCKET}/" || true
-
           aws s3 cp "s3://${S3_CONFIG_BUCKET}/config.json" "./app/configs/config.json" --no-progress
-          aws s3 cp "s3://${S3_CONFIG_BUCKET}/firebase-app-sdk-config.json" "./app/configs/firebase-app-sdk-config.json" --no-progress
 
       - name: Build by Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4

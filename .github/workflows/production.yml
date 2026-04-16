@@ -40,11 +40,11 @@ jobs:
         #   aws s3 cp "s3://${S3_CONFIG_BUCKET}/config.json" "./app/configs/config.json" --no-progress
         run: |
           cd frontend
-          aws s3 cp s3://$S3_CONFIG_BUCKET/config.json ./app/configs/config.json --quiet
+          aws s3 cp "s3://${S3_CONFIG_BUCKET}/config.json" "./app/configs/config.json" --no-progress
         # run: |
         #   cd frontend
-        #   aws s3 cp s3://$S3_CONFIG_BUCKET/config.json ./app/configs/config.json --quiet
-        #   aws s3 cp s3://$S3_CONFIG_BUCKET/firebase-app-sdk-config.json ./app/configs/firebase-app-sdk-config.json --quiet
+        #  aws s3 cp "s3://${S3_CONFIG_BUCKET}/config.json" "./app/configs/config.json" --quiet
+        #  aws s3 cp "s3://${S3_CONFIG_BUCKET}/firebase-app-sdk-config.json" "./app/configs/firebase-app-sdk-config.json" --quiet
 
       - name: Build by Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -55,12 +55,19 @@ jobs:
           npm install
           npm run build
 
-      - name: Copy Files to s3
+      - name: Sync Files to s3
         env:
           S3_RESOURCE_BUCKET: ${{ vars.S3_RESOURCE_BUCKET }}
+        # run: |
+        #   set -euo pipefail
+        #   mkdir -p ./app/configs
+
+        #   echo "S3_RESOURCE_BUCKET=s3://${S3_RESOURCE_BUCKET}/"
+        #   cd frontend
+        #   aws s3 sync ./.output/public "s3://${S3_RESOURCE_BUCKET}"
         run: |
           cd frontend
-          aws s3 sync ./public s3://$S3_RESOURCE_BUCKET
+          aws s3 sync ./.output/public "s3://${S3_RESOURCE_BUCKET}"
 
       # Clear CloudFront Caches
       - name: Clear cache in CloudFront

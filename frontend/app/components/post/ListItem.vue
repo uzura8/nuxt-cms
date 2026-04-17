@@ -35,7 +35,6 @@ const imageSize = computed((): string => {
           :mime-type="post.images[0]?.mimeType"
           :size="imageSize"
           :preload="preloadLcp"
-          :sizes="preloadLcp ? '(max-width: 767px) 100vw, 33vw' : undefined"
         />
       </RouterLink>
     </div>

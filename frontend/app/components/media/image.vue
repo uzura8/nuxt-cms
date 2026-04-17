@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// app/components/media/image.vue → MediaImage
 import { mediaUrl, assetUrl } from '@/lib/media'
 
 const props = withDefaults(
@@ -12,12 +13,15 @@ const props = withDefaults(
     isClickable?: boolean
     isRounded?: boolean
     isDisplayCaption?: boolean
-    /** LCP 候補のときだけ true。head に preload を出して早期取得する */
+    /** true のとき NuxtImg（@nuxt/image）。既定は通常の img */
+    nuxtImg?: boolean
+    /** LCP 候補のときだけ true。通常 img は head の preload、NuxtImg は同コンポーネントの preload */
     preload?: boolean
-    /** img の sizes。preload 時は imagesizes 必須のため未指定なら `100vw` */
+    /** NuxtImg 用の sizes。未指定で preload のときは `100vw` */
     sizes?: string
   }>(),
   {
+    nuxtImg: false,
     isClickable: false,
     isRounded: false,
     isDisplayCaption: false,
@@ -38,9 +42,17 @@ const intrinsicFromSizeToken = computed((): { width: number; height: number } | 
 })
 
 const resolvedSizes = computed((): string | undefined => {
+  if (!props.nuxtImg) return undefined
   if (props.sizes) return props.sizes
   if (props.preload) return '100vw'
   return undefined
+})
+
+useHead(() => {
+  if (!props.preload || props.nuxtImg) return {}
+  return {
+    link: [{ rel: 'preload', as: 'image', href: imageUrl.value }]
+  }
 })
 
 /** 画像の error はブラウザのみ。SSR や HTMLImageElement 未定義環境では何もしない。 */
@@ -56,11 +68,24 @@ function noImageUrl(payload: string | Event): void {
 <template>
   <figure class="">
     <NuxtImg
+      v-if="nuxtImg"
       :src="imageUrl"
       :width="intrinsicFromSizeToken?.width"
       :height="intrinsicFromSizeToken?.height"
       :sizes="resolvedSizes"
       :preload="preload"
+      @error="noImageUrl"
+      :class="{ 'rounded-lg': isRounded, 'cursor-pointer': isClickable }"
+      class="h-auto max-w-full"
+      :alt="caption ? caption : ''"
+    />
+    <img
+      v-else
+      :src="imageUrl"
+      :width="intrinsicFromSizeToken?.width"
+      :height="intrinsicFromSizeToken?.height"
+      :loading="preload ? 'eager' : 'lazy'"
+      decoding="async"
       @error="noImageUrl"
       :class="{ 'rounded-lg': isRounded, 'cursor-pointer': isClickable }"
       class="h-auto max-w-full"

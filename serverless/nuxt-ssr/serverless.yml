@@ -1,5 +1,8 @@
 # Nuxt Nitro (aws_lambda preset) を Lambda に載せる Serverless Framework v4 サービス。
 # CloudFront 等のオリジンは Terraform 側で、この HTTP API または将来の Function URL を指す想定。
+#
+# パッケージは sync-nitro-bundle.sh が生成する .lambda-bundle.zip（中身は .output/server のフラットコピー）。
+# patterns でサブフォルダだけ載せるとハンドラ解釈が環境でずれやすいため、artifact でルート配置に統一する。
 service: nuxt-ssr
 
 build:
@@ -22,9 +25,7 @@ provider:
     cors: true
 
 package:
-  patterns:
-    - "!**"
-    - ".nitro-bundle/**"
+  artifact: .lambda-bundle.zip
 
 functions:
   nuxtSsr:

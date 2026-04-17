@@ -1,0 +1,7 @@
+# nuxt-ssr（Serverless）作業・成果物
+nuxt-ssr/nitro-bundle/
+nuxt-ssr/.nitro-bundle/
+nuxt-ssr/.lambda-bundle.zip
+nuxt-ssr/.serverless/
+nuxt-ssr/.env
+nuxt-ssr/node_modules/

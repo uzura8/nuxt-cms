@@ -81,6 +81,12 @@ export default defineNuxtConfig({
   routeRules: {
     '/posts': { prerender: false, ssr: true },
     '/posts/**': { prerender: false, ssr: true },
+    /**
+     * S3 + CloudFront の「404 を 200 で index に差し替え」用フォールバック。
+     * トップの index.html には `path: "/"` のペイロードが埋まるため、未知パスに返すと
+     * クライアントが `/` へ寄せる。`/200.html` はルート非依存のシェルとして別生成する。
+     */
+    '/200.html': { prerender: true },
     '/**': { prerender: true }
   },
 
@@ -88,7 +94,7 @@ export default defineNuxtConfig({
     // SSR Lambda 向け（Serverless）。ローカルで Node サーバー成果物にしたいときは NITRO_PRESET=node_server 等で上書き。
     preset: process.env.NITRO_PRESET || 'aws_lambda',
     prerender: {
-      routes: ['/', '/about']
+      routes: ['/', '/about', '/200.html']
     }
   },
 

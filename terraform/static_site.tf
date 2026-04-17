@@ -167,19 +167,21 @@ resource "aws_cloudfront_distribution" "static_site" {
   #  prefix          = "log/static/prd/cf/"
   #}
 
-  # For SPA to catch all request by /index.html
+  # 存在しないオブジェクト（例: /posts/foo）向けフォールバック。
+  # Nuxt のトップ用 index.html にはルート向け SSR ペイロードが入るため、それを返すと
+  # クライアントが URL を `/` に合わせる。Nuxt の prerender で生成する `/200.html` を返す。
   custom_error_response {
     #error_caching_min_ttl = 360
     error_code         = 404
     response_code      = 200
-    response_page_path = "/index.html"
+    response_page_path = "/200.html"
   }
 
   custom_error_response {
     #error_caching_min_ttl = 360
     error_code         = 403
     response_code      = 200
-    response_page_path = "/index.html"
+    response_page_path = "/200.html"
   }
 
   default_cache_behavior {
@@ -197,12 +199,14 @@ resource "aws_cloudfront_distribution" "static_site" {
     # default_ttl     = 3600
     # max_ttl         = 86400
 
-    # Relateds Lambda@Edge function (viewer-request event)
-    lambda_function_association {
-      event_type   = "viewer-request"
-      lambda_arn   = aws_lambda_function.lambda_edge_viewer_request.qualified_arn
-      include_body = false
-    }
+    # Lambda@Edge（viewer-request）は末尾スラッシュ強制の 302 を返す（functions/src/viewer_request）。
+    # Nuxt 静的ホスティングと併用する場合はトラフィックに影響するため、一旦無効化する場合は
+    # 以下のブロックをコメントアウトする（配信更新後にキャッシュ無効化が必要な場合あり）。
+    # lambda_function_association {
+    #   event_type   = "viewer-request"
+    #   lambda_arn   = aws_lambda_function.lambda_edge_viewer_request.qualified_arn
+    #   include_body = false
+    # }
   }
 
   restrictions {

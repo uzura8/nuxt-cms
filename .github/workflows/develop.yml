@@ -94,3 +94,19 @@ jobs:
           AWS_REGION: ap-northeast-1
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Show SSR endpoint (serverless info)
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          cd serverless/nuxt-ssr
+          {
+            echo "### SSR HTTP API dev（Terraform の CloudFront オリジン用）"
+            echo ""
+            echo "次の出力の \`https://....execute-api....amazonaws.com\` の **ホスト部分**（\`https://\` を除く）をオリジンドメインとして控えてください。"
+            echo ""
+            echo '```'
+            pnpm exec serverless info --stage dev
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

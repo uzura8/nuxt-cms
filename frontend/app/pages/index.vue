@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import config from '@/configs/config.json'
 import { siteHeadTitleLine } from '@/lib/siteHead'
 
 defineOptions({ name: 'TopPage' })
 
 const { t } = useI18n()
 
+const siteI18n = computed(() => ({
+  name: t('site.name'),
+  caption: t('site.caption')
+}))
+
 const topMetaTitle = computed(
-  () => siteHeadTitleLine(config.site) || (config.site.name ?? '').trim()
+  () => siteHeadTitleLine(siteI18n.value) || t('site.name').trim()
 )
 
 usePageSeo({
   title: topMetaTitle,
-  description: () => t('page.top.description'),
   ogTitle: topMetaTitle
 })
 
@@ -43,17 +46,5 @@ const { count, countUp, countDown, resetCount } = counterState
         <button @click="resetCount">Reset</button>
       </div>
     </div>
-    <div>
-      <img
-        src="~/assets/km-001.JPG"
-        alt="コムギの写真"
-        width="300"
-      />
-    </div>
-    <hr />
-    <ul>
-      <li><NuxtLink to="/posts">Posts</NuxtLink></li>
-      <li><NuxtLink to="/todo">TODO</NuxtLink></li>
-    </ul>
   </div>
 </template>

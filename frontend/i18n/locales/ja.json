@@ -22,10 +22,14 @@
     "showMore": "もっと見る",
     "confirmationOf": "{label}の確認"
   },
+  "site": {
+    "name": "Nuxt サンプル",
+    "caption": "Nuxt サンプルです",
+    "description": "Nuxt サンプルです。"
+  },
   "page": {
     "top": {
-      "title": "トップ",
-      "description": "サンプルサイトのトップページです。"
+      "title": "トップ"
     },
     "about": {
       "title": "このサイトについて",

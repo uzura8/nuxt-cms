@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import config from '@/configs/config.json'
 // import { useGlobalHeaderStore } from '@/stores/globalHeader'
 
-const siteName = config.site.name
+const { t } = useI18n()
+const siteName = computed(() => t('site.name'))
 
 const route = useRoute()
 const current = computed((): string => route.path)

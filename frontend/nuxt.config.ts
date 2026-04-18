@@ -18,18 +18,29 @@ const appConfigRaw = existsSync(appConfigPath)
   : readFileSync(appConfigSamplePath, 'utf8')
 
 const appConfig = JSON.parse(appConfigRaw) as {
-  site: { name: string; title?: string; caption?: string; baseUrl: string }
+  site: { baseUrl: string; footerRight?: string }
   media: { url: string }
 }
 const mediaImageDomain = new URL(appConfig.media.url).hostname
 
+/** ビルド時のフォールバック（`i18n` の defaultLocale と揃える）。サイト名・説明の正は `site.*` メッセージ。 */
+const i18nDefaultLocalePath = join(dirname(fileURLToPath(import.meta.url)), 'i18n/locales/ja.json')
+const i18nDefaultSite = JSON.parse(readFileSync(i18nDefaultLocalePath, 'utf8')) as {
+  site: { name: string; caption?: string; description?: string }
+}
+const siteForBuildHead = {
+  name: i18nDefaultSite.site.name,
+  caption: i18nDefaultSite.site.caption ?? '',
+  description: i18nDefaultSite.site.description ?? ''
+}
+
 /** 本番は NUXT_PUBLIC_SITE_URL を優先。useSeoMeta / canonical の絶対 URL 基準に useRuntimeConfig().public.siteUrl を使う。 */
 const siteUrlDefault = process.env.NUXT_PUBLIC_SITE_URL || appConfig.site.baseUrl
-const siteNameDefault = process.env.NUXT_PUBLIC_SITE_NAME || appConfig.site.name
+const siteNameDefault = process.env.NUXT_PUBLIC_SITE_NAME || siteForBuildHead.name
 
 /** `<title>` の `%s` 以降。`title - caption` が空なら `site.name` にフォールバック */
 const siteTitleTemplateSuffix =
-  siteHeadTitleLine(appConfig.site) || (appConfig.site.name ?? '').trim()
+  siteHeadTitleLine(siteForBuildHead) || (siteForBuildHead.name ?? '').trim()
 
 const titleTemplateForPages = siteTitleTemplateSuffix ? `%s | ${siteTitleTemplateSuffix}` : '%s'
 
@@ -58,11 +69,11 @@ export default defineNuxtConfig({
       meta: [
         {
           name: 'description',
-          content: appConfig.site.name
+          content: siteForBuildHead.description || siteForBuildHead.name
         },
         {
           property: 'og:site_name',
-          content: appConfig.site.name
+          content: siteForBuildHead.name
         },
         { property: 'og:type', content: 'website' },
         { name: 'twitter:card', content: 'summary_large_image' }

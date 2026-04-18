@@ -1,12 +1,6 @@
 <script setup lang="ts">
-// import { useRoute } from 'vue-router'
-import config from '@/configs/config.json'
-
-const siteName = config.site.name
-const serviceId: string = config.post.serviceId
-
-// const route = useRoute()
-// const current = computed((): string => route.path)
+defineOptions({ name: 'SideMenu' })
+// 復活時: config.post.serviceId 等
 </script>
 
 <template>

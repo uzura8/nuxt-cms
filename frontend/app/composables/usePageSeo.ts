@@ -1,6 +1,5 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 
-import config from '@/configs/config.json'
 import { documentMetaTitle } from '@/lib/siteHead'
 
 /**
@@ -21,10 +20,16 @@ export type UsePageSeoOgType =
   | 'video.other'
 
 export type UsePageSeoInput = {
-  title: MaybeRefOrGetter<string>
-  description: MaybeRefOrGetter<string>
   /**
-   * `og:title` に使う文字列。省略時は `documentMetaTitle(config.site, title)`。
+   * 省略時は `t('site.name')`。
+   */
+  title?: MaybeRefOrGetter<string>
+  /**
+   * 省略時は `t('site.description')`。
+   */
+  description?: MaybeRefOrGetter<string>
+  /**
+   * `og:title` に使う文字列。省略時は `documentMetaTitle`（`site.name` / `site.caption` とページタイトル）。
    * トップのように `<title>` と `og:title` を同じにしたいページで指定する。
    */
   ogTitle?: MaybeRefOrGetter<string>
@@ -44,7 +49,8 @@ export type UsePageSeoInput = {
 /**
  * Sets `useSeoMeta` (title/description/OG) and a single canonical `link` via `useHead`.
  */
-export function usePageSeo(input: UsePageSeoInput) {
+export function usePageSeo(input: UsePageSeoInput = {}) {
+  const { t } = useI18n()
   const runtimeConfig = useRuntimeConfig()
   const route = useRoute()
 
@@ -60,12 +66,21 @@ export function usePageSeo(input: UsePageSeoInput) {
 
   const canonicalUrl = computed(() => `${siteUrlBase.value}${canonicalPath.value}`)
 
-  const title = computed(() => toValue(input.title))
-  const description = computed(() => toValue(input.description))
+  const siteForMeta = computed(() => ({
+    name: t('site.name'),
+    caption: t('site.caption')
+  }))
+
+  const title = computed(() =>
+    input.title !== undefined ? toValue(input.title) : t('site.name')
+  )
+  const description = computed(() =>
+    input.description !== undefined ? toValue(input.description) : t('site.description')
+  )
   const ogTitle =
     input.ogTitle !== undefined
       ? computed(() => toValue(input.ogTitle!))
-      : computed(() => documentMetaTitle(config.site, title.value))
+      : computed(() => documentMetaTitle(siteForMeta.value, title.value))
 
   const ogType =
     input.ogType !== undefined
@@ -93,8 +108,8 @@ export function usePageSeo(input: UsePageSeoInput) {
   }
 
   if (ogImage !== null) {
-    const twitter = twitterImage ?? ogImage
-    useSeoMeta({ ogImage, twitterImage: twitter })
+    const tw = twitterImage ?? ogImage
+    useSeoMeta({ ogImage, twitterImage: tw })
   }
 
   useHead({

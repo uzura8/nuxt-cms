@@ -22,6 +22,11 @@
     "showMore": "Show more",
     "confirmationOf": "Confirmation of {label}"
   },
+  "site": {
+    "name": "Nuxt Sample Site",
+    "caption": "This site is a Nuxt sample site",
+    "description": "This site is a Nuxt sample site"
+  },
   "page": {
     "top": {
       "title": "Top",

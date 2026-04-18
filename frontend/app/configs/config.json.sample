@@ -1,7 +1,5 @@
 {
   "site": {
-    "name": "Sample Site",
-    "caption": "This site is a sample site",
     "footerRight": "&copy;Your Organization. 2023. All rights reserved.",
     "baseUrl": "http://example.com"
   },

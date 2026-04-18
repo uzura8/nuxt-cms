@@ -58,58 +58,58 @@ resource "aws_route53_record" "static_site_cdn_a" {
   }
 }
 
-# Lambda@Edge
-## Create IAM Role and Policy
-resource "aws_iam_role" "lambda_edge_role" {
-  name = "${local.name_prefix}-lambda-edge-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = [
-            "lambda.amazonaws.com",
-            "edgelambda.amazonaws.com"
-          ]
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-resource "aws_iam_role_policy" "lambda_edge_policy" {
-  name = "${local.name_prefix}-lambda-edge-policy"
-  role = aws_iam_role.lambda_edge_role.id
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ],
-        Resource = "*"
-      }
-    ]
-  })
-}
+# # Lambda@Edge
+# ## Create IAM Role and Policy
+# resource "aws_iam_role" "lambda_edge_role" {
+#   name = "${local.name_prefix}-lambda-edge-role"
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Effect = "Allow",
+#         Principal = {
+#           Service = [
+#             "lambda.amazonaws.com",
+#             "edgelambda.amazonaws.com"
+#           ]
+#         },
+#         Action = "sts:AssumeRole"
+#       }
+#     ]
+#   })
+# }
+# resource "aws_iam_role_policy" "lambda_edge_policy" {
+#   name = "${local.name_prefix}-lambda-edge-policy"
+#   role = aws_iam_role.lambda_edge_role.id
+#   policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Effect = "Allow",
+#         Action = [
+#           "logs:CreateLogGroup",
+#           "logs:CreateLogStream",
+#           "logs:PutLogEvents"
+#         ],
+#         Resource = "*"
+#       }
+#     ]
+#   })
+# }
 
-## Lambda@Edge Function
-resource "aws_lambda_function" "lambda_edge_viewer_request" {
-  provider      = aws.lambda_edge
-  function_name = join("-", [local.name_prefix, "lambda_edge", "viewer_request"])
-  role          = aws_iam_role.lambda_edge_role.arn
-  handler       = "index.handler"
-  runtime       = "nodejs22.x"
+# ## Lambda@Edge Function
+# resource "aws_lambda_function" "lambda_edge_viewer_request" {
+#   provider      = aws.lambda_edge
+#   function_name = join("-", [local.name_prefix, "lambda_edge", "viewer_request"])
+#   role          = aws_iam_role.lambda_edge_role.arn
+#   handler       = "index.handler"
+#   runtime       = "nodejs22.x"
 
-  # Put zip file to dist directory
-  filename         = "${path.root}/functions/dist/lambda_edge_viewer_request.zip"
-  source_code_hash = filebase64sha256("${path.root}/functions/dist/lambda_edge_viewer_request.zip")
-  publish          = true
-}
+#   # Put zip file to dist directory
+#   filename         = "${path.root}/functions/dist/lambda_edge_viewer_request.zip"
+#   source_code_hash = filebase64sha256("${path.root}/functions/dist/lambda_edge_viewer_request.zip")
+#   publish          = true
+# }
 
 # CloudFront
 ## CloudFront OAI
@@ -133,6 +133,11 @@ data "aws_cloudfront_origin_request_policy" "cors_s3origin" {
   name = "Managed-CORS-S3Origin"
 }
 
+# execute-api オリジンでは Host がビューアのドメインのままだと失敗するため、Host をオリジン向けに差し替える
+data "aws_cloudfront_origin_request_policy" "all_viewer_except_host_header" {
+  name = "Managed-AllViewerExceptHostHeader"
+}
+
 ## Distribution for Static Site
 resource "aws_cloudfront_distribution" "static_site" {
   enabled             = true
@@ -142,12 +147,32 @@ resource "aws_cloudfront_distribution" "static_site" {
   origin {
     domain_name = "${local.bucket.static_site}.s3.${var.region_site}.amazonaws.com"
     origin_id   = "S3-${local.fqdn.static_site}"
+    # S3 を 非公開のまま CloudFront だけに読ませるための Origin Access Identity を指定
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.static_site.cloudfront_access_identity_path
     }
   }
 
+  # 条件付きの「カスタム」オリジン
+  dynamic "origin" {
+    # nuxt_ssr_http_api_host の指定がある場合のみオリジン追加
+    for_each = trimspace(var.nuxt_ssr_http_api_host) != "" ? [trimspace(var.nuxt_ssr_http_api_host)] : []
+    content {
+      domain_name = origin.value # nuxt server と連携する API Gateway HTTP API のドメイン名
+      origin_id   = "NuxtSsr-HttpApi"
+      custom_origin_config {
+        http_port                = 80
+        https_port               = 443
+        origin_protocol_policy   = "https-only"
+        origin_ssl_protocols     = ["TLSv1.2"]
+        origin_read_timeout      = 60
+        origin_keepalive_timeout = 5
+      }
+    }
+  }
+
   # Alternate Domain Names (CNAMEs)
+  # ココを指定しないとデフォルトの xxxx.cloudfront.net のドメインだけで配信される
   aliases = [local.fqdn.static_site]
 
   # Config for SSL Certification
@@ -159,6 +184,7 @@ resource "aws_cloudfront_distribution" "static_site" {
     ssl_support_method       = "sni-only"
   }
 
+  # destroy 後に distribution を残したい場合は true にする
   retain_on_delete = false
 
   #logging_config {
@@ -167,31 +193,36 @@ resource "aws_cloudfront_distribution" "static_site" {
   #  prefix          = "log/static/prd/cf/"
   #}
 
-  # 存在しないオブジェクト（例: /posts/foo）向けフォールバック。
+  # 存在しないオブジェクト（例: /posts/foo）向けフォールバック（S3 のみのとき）。
   # Nuxt のトップ用 index.html にはルート向け SSR ペイロードが入るため、それを返すと
   # クライアントが URL を `/` に合わせる。Nuxt の prerender で生成する `/200.html` を返す。
-  custom_error_response {
-    #error_caching_min_ttl = 360
-    error_code         = 404
-    response_code      = 200
-    response_page_path = "/200.html"
+  #
+  # SSR オリジン併用時は distribution 単位の custom_error が API 404 にも効き、
+  # response_page_path を API オリジンが解釈できず破綻するため無効化する。
+  dynamic "custom_error_response" {
+    # オリジン（S3）から 404 / 403 が返ったときの挙動を指定
+    for_each = trimspace(var.nuxt_ssr_http_api_host) == "" ? toset([404, 403]) : toset([])
+    #　 存在しないパス（例: /posts/foo）をリクエストされた場合、ルート用の index.html をそのまま返すと、
+    # Nuxt のハイドレーションと URL が噛み合わず / に寄ってしまう
+    # 代わりに /200.html を返してクライアント側ルーティング用の安全なフォールバックにしている -> nuxt.config.ts にて指定
+    content {
+      error_code         = custom_error_response.value # 404 / 403
+      response_code      = 200
+      response_page_path = "/200.html"
+    }
   }
 
-  custom_error_response {
-    #error_caching_min_ttl = 360
-    error_code         = 403
-    response_code      = 200
-    response_page_path = "/200.html"
-  }
-
+  # パスが "/posts*" 以外の場合のデキャッシュビヘイビア
   default_cache_behavior {
-    target_origin_id = "S3-${local.fqdn.static_site}"
+    target_origin_id = "S3-${local.fqdn.static_site}" # origin は S3
     #viewer_protocol_policy = "allow-all"
-    viewer_protocol_policy = "redirect-to-https"
+    viewer_protocol_policy = "redirect-to-https" # http リクエストは HTTPS にリダイレクト
     allowed_methods        = ["GET", "HEAD", "OPTIONS"]
-    cached_methods         = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"] # GET と HEAD のみキャッシュ
 
-    compress        = true
+    compress = true # 圧縮を有効化
+
+    # TTL やクエリ文字列・Cookie・ヘッダーを AWS 管理の「CachingOptimized」ポリシーに任せる
     cache_policy_id = data.aws_cloudfront_cache_policy.managed_caching_optimized.id
 
     # # cache_policy_id を使用する場合は以下のパラメータは不要
@@ -207,6 +238,24 @@ resource "aws_cloudfront_distribution" "static_site" {
     #   lambda_arn   = aws_lambda_function.lambda_edge_viewer_request.qualified_arn
     #   include_body = false
     # }
+  }
+
+  # パスが "/posts*" の場合のデキャッシュビヘイビア
+  dynamic "ordered_cache_behavior" {
+    # nuxt_ssr_http_api_host の指定がある場合のみオリジン追加
+    for_each = trimspace(var.nuxt_ssr_http_api_host) != "" ? [1] : []
+    content {
+      path_pattern     = "/posts*"
+      target_origin_id = "NuxtSsr-HttpApi" # Nuxt SSR server
+      # ビューア → CloudFront は HTTPS に統一。オリジンは execute-api へ HTTPS。
+      viewer_protocol_policy = "redirect-to-https"
+      allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+      cached_methods         = ["GET", "HEAD"] # GET と HEAD のみキャッシュ
+      compress               = true
+      cache_policy_id        = data.aws_cloudfront_cache_policy.managed_caching_disabled.id # 実質キャッシュOFFの指定
+      # ビューアから来た クエリ文字列・Cookie・ヘッダーをオリジンに渡すが、Hostだけはビューアの値をそのまま使わず、内部 Host 名に差し替える
+      origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer_except_host_header.id
+    }
   }
 
   restrictions {

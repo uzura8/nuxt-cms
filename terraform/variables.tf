@@ -48,3 +48,16 @@ variable "s3_static_site_force_destroy" {
   default     = false
 }
 
+# ========================
+# Nuxt SSR (Serverless HTTP API) — CloudFront 第 2 オリジン
+# ========================
+variable "nuxt_ssr_http_api_host" {
+  description = <<-EOT
+    API Gateway HTTP API のホスト名のみ（例: 7j78rtyiq6.execute-api.ap-northeast-1.amazonaws.com）。
+    空のときは従来どおり S3 のみ。非空のときは path /posts* をこのオリジンへ振り分ける。
+    併用時はカスタムエラー 404/403→200.html を無効化する（API オリジンに 200.html が無いため）。
+  EOT
+  type        = string
+  default     = ""
+}
+

@@ -5,26 +5,20 @@ import { siteHeadTitleLine } from '@/lib/siteHead'
 defineOptions({ name: 'TopPage' })
 
 const { t } = useI18n()
-const runtimeConfig = useRuntimeConfig()
-const siteUrlBase = computed(() => String(runtimeConfig.public.siteUrl || '').replace(/\/$/, ''))
-const canonicalUrl = computed(() => `${siteUrlBase.value}/`)
 
 const topMetaTitle = computed(
   () => siteHeadTitleLine(config.site) || (config.site.name ?? '').trim()
 )
 
-useSeoMeta({
+usePageSeo({
   title: topMetaTitle,
-  description: t('page.top.description'),
-  ogTitle: topMetaTitle,
-  ogDescription: t('page.top.description'),
-  ogUrl: canonicalUrl
+  description: () => t('page.top.description'),
+  ogTitle: topMetaTitle
 })
 
 useHead({
   /** グローバルの `ページ | site` を上書きし、トップは `title - caption` のみ */
-  titleTemplate: '%s',
-  link: [{ rel: 'canonical', href: canonicalUrl }]
+  titleTemplate: '%s'
 })
 
 const titleState = useTitleState()

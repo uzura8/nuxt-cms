@@ -1,6 +1,7 @@
 <script setup lang="ts">
+// app/pages/posts/[slug].vue
+
 import config from '@/configs/config.json'
-import { documentMetaTitle } from '@/lib/siteHead'
 import { mediaUrl } from '@/lib/media'
 import { checkSlug, truncateText } from '@/utils/string'
 import { linkClass } from '@/utils/styles'
@@ -15,11 +16,6 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-const runtimeConfig = useRuntimeConfig()
-
-const siteUrlBase = computed(() => String(runtimeConfig.public.siteUrl || '').replace(/\/$/, ''))
-const canonicalUrl = computed(() => `${siteUrlBase.value}${route.path}`)
-
 const slug = computed(() => route.params.slug as string)
 const serviceId = config.post.serviceId
 
@@ -38,8 +34,6 @@ const metaDescription = computed(() =>
     : t('page.posts.detail.loadingDescription')
 )
 
-const metaOgTitle = computed(() => documentMetaTitle(config.site, metaTitle.value))
-
 const metaOgImage = computed((): string | false => {
   const p = post.value
   if (!p) return false
@@ -53,19 +47,11 @@ const metaOgImage = computed((): string | false => {
 
 const metaOgType = computed(() => (post.value ? 'article' : 'website'))
 
-useSeoMeta({
+usePageSeo({
   title: metaTitle,
   description: metaDescription,
-  ogTitle: metaOgTitle,
-  ogDescription: metaDescription,
-  ogUrl: canonicalUrl,
   ogType: metaOgType,
-  ogImage: metaOgImage,
-  twitterImage: metaOgImage
-})
-
-useHead({
-  link: [{ rel: 'canonical', key: 'canonical', href: canonicalUrl }]
+  ogImage: metaOgImage
 })
 
 const goBack = () => {

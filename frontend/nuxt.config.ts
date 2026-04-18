@@ -31,9 +31,7 @@ const siteNameDefault = process.env.NUXT_PUBLIC_SITE_NAME || appConfig.site.name
 const siteTitleTemplateSuffix =
   siteHeadTitleLine(appConfig.site) || (appConfig.site.name ?? '').trim()
 
-const titleTemplateForPages = siteTitleTemplateSuffix
-  ? `%s | ${siteTitleTemplateSuffix}`
-  : '%s'
+const titleTemplateForPages = siteTitleTemplateSuffix ? `%s | ${siteTitleTemplateSuffix}` : '%s'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -45,6 +43,7 @@ export default defineNuxtConfig({
   typescript: {
     tsConfig: {
       compilerOptions: {
+        // CommonJS の module.exports と、ESM 風の import ... from を両対応する
         esModuleInterop: true
       }
     }

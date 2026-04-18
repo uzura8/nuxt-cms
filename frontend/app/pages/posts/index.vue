@@ -2,27 +2,15 @@
 // app/pages/posts/index.vue
 
 import config from '@/configs/config.json'
-import { documentMetaTitle } from '@/lib/siteHead'
 
 defineOptions({ name: 'PostListPage' })
 
 const { t } = useI18n()
-const runtimeConfig = useRuntimeConfig()
-const siteUrlBase = computed(() => String(runtimeConfig.public.siteUrl || '').replace(/\/$/, ''))
-const canonicalUrl = computed(() => `${siteUrlBase.value}/posts`)
 const pageTitle = computed(() => t('page.posts.list.title'))
-const fullOgTitle = computed(() => documentMetaTitle(config.site, pageTitle.value))
 
-useSeoMeta({
+usePageSeo({
   title: pageTitle,
-  description: t('page.posts.list.description'),
-  ogTitle: fullOgTitle,
-  ogDescription: t('page.posts.list.description'),
-  ogUrl: canonicalUrl
-})
-
-useHead({
-  link: [{ rel: 'canonical', href: canonicalUrl }]
+  description: () => t('page.posts.list.description')
 })
 
 const serviceId = config.post.serviceId

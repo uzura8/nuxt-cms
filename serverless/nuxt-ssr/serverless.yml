@@ -29,7 +29,7 @@ package:
 
 functions:
   nuxtSsr:
-    handler: index.handler
+    handler: index.handler # frontend/.output/server/index.handler がデプロイされる
     description: Nuxt Nitro SSR on Lambda
     environment:
       NUXT_PUBLIC_SITE_URL: ${env:NUXT_PUBLIC_SITE_URL, ''}

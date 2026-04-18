@@ -11,8 +11,8 @@ Nuxt Nitro（`nitro.preset: aws_lambda`）の Lambda バンドルを配備する
 
 ### デプロイの有無（重要）
 
-- **`develop` ブランチ**: `.github/workflows/develop.yml` で **`pnpm run build` を 1 回だけ**実行し、その続きで **S3（dev）に `.output/public` を同期**してから **`serverless deploy --stage dev`** し、CloudFront（dev）を無効化します。
-- **`main` ブランチ**: `.github/workflows/production.yml` で同様に **1 ビルド → S3（prod）同期 → `serverless deploy --stage prod` → CloudFront（prod）無効化**します。
+- `**develop` ブランチ**: `.github/workflows/develop.yml` で `**pnpm run build` を 1 回だけ**実行し、その続きで **S3（dev）に `.output/public` を同期**してから `**serverless deploy --stage dev`** し、CloudFront（dev）をキャッシュ削除します。
+- `**main` ブランチ**: `.github/workflows/production.yml` で同様に **1 ビルド → S3（prod）同期 → `serverless deploy --stage prod` → CloudFront（prod）キャッシュ削除**します。
 
 手元だけで dev に載せたい場合の例:
 
@@ -39,8 +39,8 @@ pnpm exec serverless info --stage dev
 ### Terraform（CloudFront カスタムオリジン）に書く値
 
 - **カスタムオリジンのドメイン（ホストのみ）**  
-  上記 URL から `https://` を除いたホスト名。末尾のパスやステージ用プレフィックスが表示されている場合は、API の設計に合わせてオリジン／Behavior のパスで揃えます。  
-  例: `https://abc123.execute-api.ap-northeast-1.amazonaws.com` → `abc123.execute-api.ap-northeast-1.amazonaws.com`
+上記 URL から `https://` を除いたホスト名。末尾のパスやステージ用プレフィックスが表示されている場合は、API の設計に合わせてオリジン／Behavior のパスで揃えます。  
+例: `https://abc123.execute-api.ap-northeast-1.amazonaws.com` → `abc123.execute-api.ap-northeast-1.amazonaws.com`
 
 プロトコルはオリジン側で **HTTPS only**（`443`）を指定します。
 
@@ -54,18 +54,18 @@ pnpm exec serverless info --stage dev
 
 ## Terraform（CloudFront 二オリジン）
 
-`terraform/variables.tf` の **`nuxt_ssr_http_api_host`** に、上記と同じ **ホスト名のみ**（`https://` なし）を設定すると、`terraform/static_site.tf` の CloudFront が **`/posts*` を HTTP API オリジン**へ振り分けます。
+`terraform/variables.tf` の `**nuxt_ssr_http_api_host`** に、上記と同じ **ホスト名のみ**（`https://` なし）を設定すると、`terraform/static_site.tf` の CloudFront が `**/posts*` を HTTP API オリジン**へ振り分けます。
 
 - **SSR 未設定（空文字）**: 従来どおり S3 のみ。404/403 は `/200.html` にフォールバック（静的 SPA 用）。
 - **SSR 設定済み**: `/posts*` は execute-api へ。配布全体の custom error を無効化するため、**それ以外の未知パス**は S3 の生の 404 になり得ます（必要なら後から Viewer Request 等で S3 のみ 200.html に限定する）。
 
 ## CloudFront 分割時：`/_nuxt/*.js` が 404（`application/xml`）になる理由
 
-ブラウザは **HTML を取ったオリジン**ではなく、**ドキュメント内の URL** に従って `/_nuxt/xxxx.js` を取りにいきます。Terraform では **`/posts*` 以外は S3** なので、**チャンクは常に S3** から配られます。
+ブラウザは **HTML を取ったオリジン**ではなく、**ドキュメント内の URL** に従って `/_nuxt/xxxx.js` を取りにいきます。Terraform では `**/posts*` 以外は S3** なので、**チャンクは常に S3** から配られます。
 
-一方、**`/posts*` の HTML** は **Lambda 上の Nitro** が、**その Lambda 用に実行した `nuxt build` の結果**（`buildId` や `/_nuxt/` のファイル名のハッシュ）を埋め込みます。
+一方、`**/posts*` の HTML** は **Lambda 上の Nitro** が、**その Lambda 用に実行した `nuxt build` の結果**（`buildId` や `/_nuxt/` のファイル名のハッシュ）を埋め込みます。
 
-**`develop` と `main` の両方**で、それぞれ `develop.yml` / `production.yml` の **同一ジョブ内**に `pnpm run build` → S3 同期 → `serverless deploy` がまとまっており、**HTML と `/_nuxt` のビルドがズレる典型原因は解消**されています。
+`**develop` と `main` の両方**で、それぞれ `develop.yml` / `production.yml` の **同一ジョブ内**に `pnpm run build` → S3 同期 → `serverless deploy` がまとまっており、**HTML と `/_nuxt` のビルドがズレる典型原因は解消**されています。
 
 ### 過去に起きていた不整合（参考）
 

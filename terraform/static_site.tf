@@ -138,6 +138,16 @@ data "aws_cloudfront_origin_request_policy" "all_viewer_except_host_header" {
   name = "Managed-AllViewerExceptHostHeader"
 }
 
+# CloudFront は us-east-1 API 前提のため lambda_edge（既定 us-east-1）を使う
+resource "aws_cloudfront_function" "s3_prerender_directory_index" {
+  provider = aws.lambda_edge
+  name     = join("-", [local.name_prefix, "cf", "s3-prerender-dir-index"])
+  runtime  = "cloudfront-js-1.0"
+  comment  = "Map /about -> /about/index.html for S3+OAI (avoids 403 AccessDenied on missing key)"
+  publish  = true
+  code     = file("${path.module}/functions/cloudfront/s3_prerender_directory_index.js")
+}
+
 ## Distribution for Static Site
 resource "aws_cloudfront_distribution" "static_site" {
   enabled             = true
@@ -238,6 +248,14 @@ resource "aws_cloudfront_distribution" "static_site" {
     #   lambda_arn   = aws_lambda_function.lambda_edge_viewer_request.qualified_arn
     #   include_body = false
     # }
+
+    # S3 オリジンは Web サイトエンドポイントの「ディレクトリ index」相当が無い。
+    # `/about` はオブジェクト `about` として解釈され 403 になり得るため、prerender の `about/index.html` に寄せる。
+    # `/posts*` は ordered_cache_behavior 側のためこの関数は掛からない。
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.s3_prerender_directory_index.arn
+    }
   }
 
   # パスが "/posts*" の場合のデキャッシュビヘイビア

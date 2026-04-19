@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// app/pages/index.vue
+
+import { buttonClass } from '@/utils/buttonStyles'
+
 defineOptions({ name: 'TopPage' })
 usePageSeo()
 
@@ -20,12 +24,13 @@ const description = t('site.description')
       <p class="mt-8 text-lg font-normal text-body lg:text-xl sm:px-16 xl:px-48">
         {{ description }}
       </p>
-      <a
-        href="#"
-        class="mt-6 inline-flex items-center text-white bg-brand box-border border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-base px-5 py-3 focus:outline-none"
+      <NuxtLink
+        to="/about"
+        :class="buttonClass({ variant: 'brand', size: 'md' })"
+        class="mt-6"
       >
         {{ t('common.showMore') }}
-      </a>
+      </NuxtLink>
       <div class="mt-12">
         <img
           src="~/assets/km-001.JPG"

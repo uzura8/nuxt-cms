@@ -1,47 +1,25 @@
-<script setup lang="ts">
-// app/components/base/Button.vue
+type ClassValue = string | false | null | undefined
 
-import { computed, useAttrs } from 'vue'
+const cx = (...values: ClassValue[]) => values.filter(Boolean).join(' ')
 
-type ButtonVariant = 'brand' | 'light' | 'success' | 'danger' | 'warning' | 'dark'
-type ButtonSize = 'xs' | 'sm' | 'md' | 'base' | 'lg' | 'xl'
+export type ButtonVariant = 'brand' | 'light' | 'success' | 'danger' | 'warning' | 'dark'
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'base' | 'lg' | 'xl'
 
-const props = withDefaults(
-  defineProps<{
-    variant?: ButtonVariant
-    isOutline?: boolean
-    size?: ButtonSize
-    isRound?: boolean
-    nativeType?: 'button' | 'submit' | 'reset' // HTMLのbutton[type]
-    disabled?: boolean // disabled を props でも受ける（attrsのdisabledでもOK）
-  }>(),
-  {
-    variant: 'brand',
-    isOutline: false,
-    size: 'md',
-    isRound: false,
-    nativeType: 'button',
-    disabled: false
-  }
-)
-
-const attrs = useAttrs()
-
-const isDisabled = computed(() => {
-  if (props.disabled) return true
-  const v = (attrs as Record<string, unknown>).disabled
-  return v === '' || v === true || v === 'true'
-})
+export type ButtonClassOptions = {
+  variant?: ButtonVariant
+  isOutline?: boolean
+  size?: ButtonSize
+  isRound?: boolean
+  disabled?: boolean
+}
 
 const baseClass =
   'inline-flex items-center justify-center box-border font-medium focus:outline-none cursor-pointer rounded-base'
 
-const sizeClass = computed(() => {
-  // base と md を同義にする
-  const s = props.size === 'base' ? 'md' : props.size
+function buttonSizeClass(size: ButtonSize, isOutline: boolean): string {
+  const s = size === 'base' ? 'md' : size
 
-  // ※あなたのサンプルに合わせて「outline + sm は text-xs」に寄せる
-  if (props.isOutline && s === 'sm') return 'leading-5 text-xs px-3 py-2'
+  if (isOutline && s === 'sm') return 'leading-5 text-xs px-3 py-2'
 
   switch (s) {
     case 'xs':
@@ -57,9 +35,7 @@ const sizeClass = computed(() => {
     default:
       return 'leading-5 text-sm px-4 py-2.5'
   }
-})
-
-const roundClass = computed(() => (props.isRound ? 'rounded-full' : 'rounded-base'))
+}
 
 const filledByVariant: Record<ButtonVariant, string> = {
   brand:
@@ -89,39 +65,29 @@ const outlineByVariant: Record<ButtonVariant, string> = {
   dark: 'text-dark bg-neutral-primary border border-dark hover:bg-dark hover:text-white focus:ring-4 focus:ring-neutral-tertiary'
 }
 
-const variantClass = computed(() =>
-  props.isOutline ? outlineByVariant[props.variant] : filledByVariant[props.variant]
-)
-
 const disabledClass =
   'text-fg-disabled bg-disabled border border-default-medium shadow-xs cursor-not-allowed'
 
-const passthroughAttrs = computed(() => {
+/**
+ * BaseButton と同じ見た目の Tailwind クラス文字列（NuxtLink 等に付与する用途）
+ */
+export function buttonClass(opts: ButtonClassOptions = {}) {
   const {
-    class: _class,
-    variant: _variant,
-    disabled: _disabled,
-    ...rest
-  } = attrs as Record<string, unknown>
-  return rest
-})
+    variant = 'brand',
+    isOutline = false,
+    size = 'md',
+    isRound = false,
+    disabled = false
+  } = opts
 
-const classes = computed(() => [
-  baseClass,
-  sizeClass.value,
-  variantClass.value,
-  roundClass.value, // sizeClassにrounded-baseが入ってても、最後に上書きするために置いてる
-  isDisabled.value ? disabledClass : null
-])
-</script>
+  const variantClass = isOutline ? outlineByVariant[variant] : filledByVariant[variant]
+  const roundClass = isRound ? 'rounded-full' : 'rounded-base'
 
-<template>
-  <button
-    :type="nativeType"
-    :disabled="isDisabled"
-    :class="[classes, attrs.class]"
-    v-bind="passthroughAttrs"
-  >
-    <slot />
-  </button>
-</template>
+  return cx(
+    baseClass,
+    buttonSizeClass(size, isOutline),
+    variantClass,
+    roundClass,
+    disabled && disabledClass
+  )
+}

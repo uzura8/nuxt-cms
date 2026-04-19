@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import config from '@/configs/config.json'
 import type { CategoryPublic } from '@/types/Category'
 import { linkClass } from '@/utils/styles'
 
@@ -7,13 +8,14 @@ const props = withDefaults(
     serviceId: string
     categorySlug?: string
     tagLabel?: string
-    /** 1 ページあたり件数。未指定なら API デフォルト */
+    /** 1 ページあたり件数。未指定なら `config.common.pagerCount` */
     count?: number
   }>(),
   {
     serviceId: '',
     categorySlug: '',
-    tagLabel: ''
+    tagLabel: '',
+    count: config.common.pagerCount
   }
 )
 

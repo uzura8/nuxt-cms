@@ -36,4 +36,4 @@ dist/
 /app/configs/config.json
 
 # --- Project ---
-/_reference_vue_src/*
+/_reference_vue_src

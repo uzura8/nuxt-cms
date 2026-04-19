@@ -7,6 +7,7 @@
     "yes": "はい",
     "no": "いいえ",
     "cancel": "キャンセル",
+    "back": "戻る",
     "save": "保存",
     "addNew": "新規追加",
     "delete": "削除",
@@ -29,7 +30,8 @@
   },
   "page": {
     "top": {
-      "title": "トップ"
+      "title": "トップ",
+      "recentPosts": "新着投稿"
     },
     "about": {
       "title": "このサイトについて",

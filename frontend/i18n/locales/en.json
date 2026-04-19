@@ -7,6 +7,7 @@
     "yes": "Yes",
     "no": "No",
     "cancel": "Cancel",
+    "back": "Back",
     "save": "Save",
     "addNew": "Add new",
     "delete": "Delete",
@@ -30,7 +31,7 @@
   "page": {
     "top": {
       "title": "Top",
-      "description": "Welcome to the sample site."
+      "recentPosts": "Recent posts"
     },
     "about": {
       "title": "About this site",
@@ -42,7 +43,6 @@
         "description": "Browse posts."
       },
       "detail": {
-        "title": "Post",
         "loadingTitle": "Loading post content.",
         "loadingDescription": "Loading post content."
       }

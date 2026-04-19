@@ -11,6 +11,8 @@ export type UsePostListOptions = {
   count?: MaybeRefOrGetter<number | undefined>
   /** レスポンス meta.category があるときに呼ぶ */
   onMetaCategory?: (category: CategoryPublic) => void
+  /** `useAsyncData` のキー。未指定時は `post-list-current`（複数一覧を同一ページに置くときなどに指定） */
+  asyncDataKey?: MaybeRefOrGetter<string | undefined>
 }
 
 export function usePostList(options: UsePostListOptions) {
@@ -21,12 +23,17 @@ export function usePostList(options: UsePostListOptions) {
     count: toValue(options.count) || undefined
   })
 
+  const asyncKey = computed(() => {
+    const custom = toValue(options.asyncDataKey)
+    return custom && custom.length > 0 ? custom : 'post-list-current'
+  })
+
   const {
     data: fetchData,
     pending: isLoading,
     error
   } = useAsyncData(
-    'post-list-current',
+    asyncKey,
     async (): Promise<PostsListApiResponse | null> => {
       const sid = toValue(options.serviceId)
       if (!sid) return null
@@ -38,7 +45,8 @@ export function usePostList(options: UsePostListOptions) {
         () => toValue(options.serviceId),
         () => toValue(options.categorySlug),
         () => toValue(options.tagLabel),
-        () => toValue(options.count)
+        () => toValue(options.count),
+        () => toValue(options.asyncDataKey)
       ]
     }
   )

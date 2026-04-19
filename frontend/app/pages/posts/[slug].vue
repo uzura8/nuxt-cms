@@ -71,7 +71,7 @@ const goBack = () => {
           icon="angle-left"
           class="me-2"
         />
-        <span>{{ $t('page.posts.list.title') }}</span>
+        <span>{{ $t('common.back') }}</span>
       </button>
     </div>
 

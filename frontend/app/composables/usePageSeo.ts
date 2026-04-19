@@ -1,6 +1,6 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 
-import { documentMetaTitle } from '@/lib/siteHead'
+import { documentMetaTitle, siteHeadTitleLine } from '@/lib/siteHead'
 
 /**
  * `useSeoMeta` の `ogType` が受け付ける値（Nuxt / unhead の定義に合わせる）。
@@ -44,15 +44,28 @@ export type UsePageSeoInput = {
    * When omitted but `ogImage` is set, defaults to the same value as `ogImage`.
    */
   twitterImage?: MaybeRefOrGetter<string | false | undefined>
+  /**
+   * `useHead` の `titleTemplate`。指定時のみグローバル（例: `nuxt.config` の `%s | …`）を上書きする。
+   * 省略時、**引数なし（空オブジェクト）かつルート `/`** のときはトップ用に `'%s'` を付与する。
+   */
+  titleTemplate?: MaybeRefOrGetter<string>
+}
+
+function isBarePageSeoInput(input: UsePageSeoInput): boolean {
+  return Object.keys(input).length === 0
 }
 
 /**
- * Sets `useSeoMeta` (title/description/OG) and a single canonical `link` via `useHead`.
+ * Sets `useSeoMeta` (title/description/OG) and `useHead`（canonical `link`、任意で `titleTemplate`）。
+ *
+ * `usePageSeo()`（引数なし）を **`/` のページ**だけで使うと、トップ向けの既定（`siteHeadTitleLine` 由来の title / og:title、`titleTemplate: '%s'`、説明は `site.description`）になる。
  */
 export function usePageSeo(input: UsePageSeoInput = {}) {
   const { t } = useI18n()
   const runtimeConfig = useRuntimeConfig()
   const route = useRoute()
+
+  const bareHomeSeo = computed(() => isBarePageSeoInput(input) && route.path === '/')
 
   const siteUrlBase = computed(() => String(runtimeConfig.public.siteUrl || '').replace(/\/$/, ''))
 
@@ -71,16 +84,25 @@ export function usePageSeo(input: UsePageSeoInput = {}) {
     caption: t('site.caption')
   }))
 
-  const title = computed(() =>
-    input.title !== undefined ? toValue(input.title) : t('site.name')
+  const homeLineTitle = computed(
+    () => siteHeadTitleLine(siteForMeta.value) || t('site.name').trim()
   )
+
+  const title = computed(() => {
+    if (bareHomeSeo.value) return homeLineTitle.value
+    return input.title !== undefined ? toValue(input.title) : t('site.name')
+  })
+
   const description = computed(() =>
     input.description !== undefined ? toValue(input.description) : t('site.description')
   )
-  const ogTitle =
-    input.ogTitle !== undefined
-      ? computed(() => toValue(input.ogTitle!))
-      : computed(() => documentMetaTitle(siteForMeta.value, title.value))
+
+  const ogTitle = computed(() => {
+    if (bareHomeSeo.value) return homeLineTitle.value
+    return input.ogTitle !== undefined
+      ? toValue(input.ogTitle!)
+      : documentMetaTitle(siteForMeta.value, title.value)
+  })
 
   const ogType =
     input.ogType !== undefined
@@ -112,9 +134,18 @@ export function usePageSeo(input: UsePageSeoInput = {}) {
     useSeoMeta({ ogImage, twitterImage: tw })
   }
 
-  useHead({
-    link: [{ rel: 'canonical', key: 'canonical', href: canonicalUrl }]
-  })
+  useHead(
+    computed(() => {
+      const link = [{ rel: 'canonical' as const, key: 'canonical' as const, href: canonicalUrl.value }]
+      if (input.titleTemplate !== undefined) {
+        return { link, titleTemplate: String(toValue(input.titleTemplate)) }
+      }
+      if (bareHomeSeo.value) {
+        return { link, titleTemplate: '%s' }
+      }
+      return { link }
+    })
+  )
 
   return {
     canonicalUrl

@@ -4,7 +4,7 @@ import { fetchPostsList, withListServiceId, type PostsListQuery } from '@/lib/ap
 import type { CategoryPublic } from '@/types/Category'
 import type { PostPublic, PostsListApiResponse } from '@/types/Post'
 
-export type UsePostsListOptions = {
+export type UsePostListOptions = {
   serviceId: MaybeRefOrGetter<string>
   categorySlug?: MaybeRefOrGetter<string | undefined>
   tagLabel?: MaybeRefOrGetter<string | undefined>
@@ -13,7 +13,7 @@ export type UsePostsListOptions = {
   onMetaCategory?: (category: CategoryPublic) => void
 }
 
-export function usePostsList(options: UsePostsListOptions) {
+export function usePostList(options: UsePostListOptions) {
   const postsListQuery = (pageToken?: string | null): PostsListQuery => ({
     pageToken: pageToken ?? undefined,
     categorySlug: toValue(options.categorySlug) || undefined,

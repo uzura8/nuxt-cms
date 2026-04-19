@@ -23,12 +23,12 @@ const emits = defineEmits<{
   (e: 'updateCategory', category: CategoryPublic): void
 }>()
 
-const { posts, hasNext, isLoading, isAppending, error, loadMore } = usePostsList({
+const { posts, hasNext, isLoading, isAppending, error, loadMore } = usePostList({
   serviceId: () => props.serviceId,
   categorySlug: () => props.categorySlug,
   tagLabel: () => props.tagLabel,
   count: () => props.count,
-  onMetaCategory: (category) => emits('updateCategory', category)
+  onMetaCategory: (category: CategoryPublic) => emits('updateCategory', category)
 })
 </script>
 

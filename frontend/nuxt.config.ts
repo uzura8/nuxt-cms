@@ -179,5 +179,10 @@ export default defineNuxtConfig({
   image: {
     domains: [mediaImageDomain],
     format: ['avif', 'webp']
+  },
+
+  /** `app/composables/post/` 配下も自動 import・型生成の対象にする */
+  imports: {
+    dirs: ['composables/post']
   }
 })

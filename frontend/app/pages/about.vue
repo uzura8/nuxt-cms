@@ -14,10 +14,11 @@ usePageSeo({
   <div>
     <h1>{{ pageTitle }}</h1>
     <div>
-      <img
-        src="~/assets/km-001.JPG"
+      <NuxtImg
+        src="/images/km-002.JPG"
         alt="コムギの写真"
         width="300"
+        sizes="300px"
       />
     </div>
   </div>

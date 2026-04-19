@@ -32,10 +32,11 @@ const description = t('site.description')
         {{ t('common.showMore') }}
       </NuxtLink>
       <div class="mt-12">
-        <img
-          src="~/assets/km-001.JPG"
+        <NuxtImg
+          src="/images/km-001.JPG"
           alt="コムギの写真"
           width="300"
+          sizes="300px"
           class="mx-auto"
         />
       </div>

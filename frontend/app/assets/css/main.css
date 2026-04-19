@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+/* Nuxt の `app/` 配下をクラス検出対象に含める（v4 は CSS がエントリのため明示が必要） */
+@config "../../../tailwind.config.js";
+@source "../../**/*.{vue,ts,js,mjs}";
+
 /* choose one of the following */
 
 /* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap'); */

@@ -41,12 +41,10 @@ const { posts, hasNext, isLoading, isAppending, error, loadMore } = usePostsList
       {{ $t('message.fetchFailed') }}
     </p>
 
-    <p
+    <BaseLoading
       v-else-if="isLoading && posts.length === 0"
-      class="text-gray-500 text-center py-8"
-    >
-      {{ $t('common.loading') }}
-    </p>
+      is-active
+    />
 
     <div
       v-else-if="posts.length"
@@ -60,17 +58,22 @@ const { posts, hasNext, isLoading, isAppending, error, loadMore } = usePostsList
       />
       <div
         v-if="hasNext"
-        class="text-center"
+        class="relative text-center"
       >
         <button
           type="button"
           :disabled="isAppending"
           :class="linkClass()"
-          class="text-lg lg:text-xl block w-full py-2 hover:bg-gray-50"
+          class="text-lg lg:text-xl relative z-0 block w-full py-2 hover:bg-gray-50"
           @click="loadMore"
         >
-          {{ isAppending ? $t('common.loading') : $t('common.showMore') }}
+          <span :class="{ invisible: isAppending }">{{ $t('common.showMore') }}</span>
         </button>
+        <BaseLoading
+          :is-active="isAppending"
+          fit="parent"
+          spinner-size="sm"
+        />
       </div>
     </div>
 

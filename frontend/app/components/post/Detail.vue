@@ -21,12 +21,10 @@ defineProps<{
       {{ $t('message.fetchFailed') }}
     </p>
 
-    <p
+    <BaseLoading
       v-else-if="isLoading && !post"
-      class="text-gray-500 text-center py-8"
-    >
-      {{ $t('common.loading') }}
-    </p>
+      is-active
+    />
 
     <div
       v-else-if="post"

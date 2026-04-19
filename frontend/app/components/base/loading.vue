@@ -15,6 +15,7 @@ interface Props {
    */
   fit?: LoadingFit
   spinnerSize?: LoadingSpinnerSize
+  /** true のとき不透明白（ぼかしなし） */
   disableTransparency?: boolean
 }
 
@@ -34,6 +35,11 @@ const spinnerRingClass = computed(() => {
       return 'h-10 w-10 border-4'
   }
 })
+
+/** 透過は白ベース + 弱い背面ぼかし */
+const backdropClass = computed(() =>
+  props.disableTransparency ? 'bg-white' : 'bg-white/70 backdrop-blur-sm'
+)
 </script>
 
 <template>
@@ -43,7 +49,7 @@ const spinnerRingClass = computed(() => {
       role="status"
       aria-busy="true"
       class="fixed inset-0 z-50 flex items-center justify-center transition-opacity"
-      :class="disableTransparency ? 'bg-gray-100' : 'bg-gray-100/60'"
+      :class="backdropClass"
     >
       <div
         class="animate-spin rounded-full border-primary-500 border-t-transparent"
@@ -56,7 +62,7 @@ const spinnerRingClass = computed(() => {
       role="status"
       aria-busy="true"
       class="absolute inset-0 z-10 flex min-h-12 items-center justify-center transition-opacity"
-      :class="disableTransparency ? 'bg-gray-100' : 'bg-gray-100/60'"
+      :class="backdropClass"
     >
       <div
         class="animate-spin rounded-full border-primary-500 border-t-transparent"
@@ -72,7 +78,7 @@ const spinnerRingClass = computed(() => {
         role="status"
         aria-busy="true"
         class="absolute inset-0 z-10 flex items-center justify-center transition-opacity"
-        :class="disableTransparency ? 'bg-gray-100' : 'bg-gray-100/60'"
+        :class="backdropClass"
       >
         <div
           class="animate-spin rounded-full border-primary-500 border-t-transparent"

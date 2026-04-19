@@ -1,6 +1,11 @@
-# Cursor から触らせたくないもの
+# Cursor から触らせたくないもの・インデックスから外したいもの
+# 参照: .gitignore, terraform/.gitignore, serverless/.gitignore
+
+# --- 環境・秘密（.gitignore と整合）---
 .env
 .env.*
+!.env.example
+!.env.sample
 *.pem
 *.key
 *.crt
@@ -8,7 +13,7 @@
 *.pfx
 *.log
 
-# 生成物・キャッシュ
+# --- 生成物・キャッシュ（共通）---
 node_modules/
 .nuxt/
 .output/
@@ -17,11 +22,48 @@ coverage/
 .cache/
 .tmp/
 temp/
+.pnpm-store/
 
-# OS / editor
+# --- OS / エディタ ---
+*~
+*.bak
 .DS_Store
+Thumbs.db
+*.local
 .idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# .gitignore に合わせ、追跡している .vscode 配下のみインデックス対象に戻す
 .vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+desktop.ini
 
-# Git / CI
+# --- リポジトリルート（/.gitignore の /public）---
+/public/
+
+# --- Terraform（terraform/.gitignore）---
+terraform/.terraform/
+terraform/.terraform.tfstate.lock.info
+terraform/terraform.tfstate*
+terraform/errored.tfstate*
+terraform/terraform.json*
+terraform/terraform.tfvars
+terraform/var/
+terraform/functions/dist/
+terraform/functions/node_modules/
+terraform/functions/package-lock.json
+terraform/functions/src/*/configs/config.js
+
+# --- Serverless（serverless/.gitignore）---
+serverless/nuxt-ssr/nitro-bundle/
+serverless/nuxt-ssr/.nitro-bundle/
+serverless/nuxt-ssr/.lambda-bundle.zip
+serverless/nuxt-ssr/.serverless/
+
+# --- Git / CI ---
 .git/

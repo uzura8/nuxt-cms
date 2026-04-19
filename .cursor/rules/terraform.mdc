@@ -1,0 +1,72 @@
+---
+description: terraform 向けのインフラ定義ルール
+globs:
+  - "terraform/**/*.tf"
+  - "terraform/**/*.tfvars"
+  - "terraform/**/*.tfvars.sample"
+  - "terraform/.terraform.lock.hcl"
+  - "terraform/bin/**/*"
+  - "terraform/functions/**/*.js"
+alwaysApply: false
+---
+
+# terraform ルール
+
+このルールは `terraform/` 配下の Terraform 定義および関連スクリプト・Lambda@Edge 用 JS を変更する場合に適用する。
+
+monorepo 全体の共通方針（領域をまたぐ変更、検証・完了報告、シークレット扱いなど）は、リポジトリ直下の `AGENTS.md` を参照する。
+
+## 前提
+
+- このディレクトリは AWS 向けインフラを Terraform で管理する
+- `providers.tf` で `required_version` および `required_providers`（例: `hashicorp/aws`, `hashicorp/random`）が指定されている。バージョン制約を安易に広げない
+- バックエンドは S3 を想定したブロックがある。state の扱いは既存運用に従う
+
+## Serverless Framework との境界
+
+- アプリケーションのデプロイや API 実体が Serverless 側で管理される内容を、Terraform に無理に寄せない
+- IAM・API Gateway・環境変数・リソース参照の整合が必要なときは、`AGENTS.md` の「serverless / terraform をまたぐ場合」に従い、変更対象がアプリかインフラかを先に切り分ける
+- 変数コメントで serverless の出力（例: `serverless info` の endpoint ホスト）と揃える必要がある場合は、コメントと実値のズレを残さない
+
+## シークレットと機微情報
+
+- 認証情報・アカウント固有 ID・ドメインの実値を、コミット対象の `*.tfvars` に書かない（チーム方針で例外がある場合はそれに従う）
+- サンプルは `terraform.tfvars.sample` のようにプレースホルダで示し、実値はローカルや CI のシークレット管理に置く
+- 証明書・鍵類をリポジトリに追加しない
+
+## 基本方針
+
+- 変更は小さく、目的に集中する。無関係なリソースの整形やリネームだけの差分を広げない
+- 編集前に、同じ関心事が `variables.tf`・各 `*.tf`・既存の `locals` にどう分散しているかを読む
+- 既存の `variable` / `resource` / `module` の命名、`tags` の付け方、コメントの書き方に合わせる
+- 新規 `variable` には用途が分かる `description` を付ける（既存に合わせる）
+- `default` の追加や既存のデフォルト変更は、意図した環境差分を生まないか確認する
+
+## リソース設計
+
+- リージョンは `variables.tf` の `region_*` 等の既存変数に合わせる（ACM / Lambda@Edge は `us-east-1` など制約に注意）
+- Route53・ACM・CloudFront・S3 など、既存ファイルの責務分離（例: `domain_api.tf`, `static_site.tf`）を崩さない。新規リソースは近い関心事のファイルに寄せるか、分割理由が明確なら新ファイルを検討する
+- `force_destroy` など破壊的な挙動のフラグは、コメントとデフォルトを既存方針に合わせる
+
+## Lambda@Edge / `functions/`
+
+- `terraform/functions/` の JS はデプロイパス上のコードとして扱い、Terraform 変更とセットで整合を確認する
+- `terraform/bin/` のシェル（例: パッケージング）がある場合は、手順や成果物の置き場を既存スクリプトに合わせる
+
+## 検証
+
+- 実在する Terraform のバージョンとサブコマンドのみ前提にする。実行前に `terraform version` やチーム手順を確認する
+- 変更後は可能な範囲で `terraform fmt`（差分が意図通りか確認）、`terraform validate` を検討する
+- `plan` は実環境に対する影響が大きいため、ユーザーまたは CI の方針に従い、無断で破壊的変更を進めない
+- `.terraform/` はローカル生成物として扱い、リポジトリにコミットしない（`.gitignore` に従う）
+
+## 完了報告
+
+- 変更した `.tf` や関連ファイル、実行した検証コマンドを明記する
+- serverless / frontend との接続（変数名・URL・ホスト名）に触れた場合は、その整合確認を報告に含める
+- 未実行の `plan` / apply や、環境依存で確認できなかった点は推測として書かず、懸念として明示する
+
+## 出力方針
+
+- 説明は原則日本語とする。リソース名・ブロック名・パス・CLI は必要に応じて英語のままよい
+- 事実と推測を混同しない。簡潔で実務的な説明を優先する

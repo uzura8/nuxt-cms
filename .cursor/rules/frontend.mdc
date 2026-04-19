@@ -22,6 +22,8 @@ alwaysApply: false
 
 このルールは `frontend/` 配下の Nuxt / Vue / TypeScript / Tailwind 関連ファイルを変更する場合に適用する。
 
+monorepo 全体の共通方針（領域をまたぐ変更、検証・完了報告の領域区分、シークレット扱いなど）は、リポジトリ直下の `AGENTS.md` を参照する。
+
 ## 前提
 
 - このプロジェクトの frontend は Nuxt ベースである

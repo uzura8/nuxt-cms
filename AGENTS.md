@@ -5,26 +5,24 @@
 このリポジトリは Web アプリケーションの monorepo である。
 
 - `frontend/` は現在存在し、Nuxt アプリケーションを扱う
-- `backend/` は今後追加予定であり、追加後は FastAPI アプリケーションを扱う想定である
-- `backend/` のアプリケーションは AWS Lambda + API Gateway 上で動作する想定である
-- `backend/` のデプロイ管理には Serverless Framework を使用する想定である
-- `terraform/` はAWS インフラ定義を扱う
-- `.github/` はリポジトリ設定および補助的な設定を扱う
-
-変更前に、対象の変更がどのディレクトリの責務かを確認すること。
-存在しないディレクトリや未追加の構成を前提に変更提案しないこと。
+- `serverless/` は Serverless Framework を使用した AWS Lambda のデプロイを扱う
+- `terraform/` は Terraform を使用した AWS インフラ定義を扱う
+- `.github/` は GitHub Actions のワークフローなど CI 関連を扱う（例: `workflows/develop.yml`, `workflows/production.yml`）
 
 ## リポジトリ構成
 
 現在存在する主なディレクトリ:
 
 - `frontend/`: Nuxt / Vue / TypeScript のコード
-- `.github/`: リポジトリ設定
+- `serverless/`: Serverless Framework を使用した AWS Lambda のデプロイ
+- `terraform/`: Terraform を使用した AWS インフラ定義
+- `.github/`: GitHub Actions のワークフローなど CI 関連
 
-今後追加予定のディレクトリ:
+## ルールの置き場所
 
-- `backend/`: FastAPI / Python のコード
-- `terraform/`: AWS インフラ定義
+- **`frontend/` 配下の実装**（Nuxt / Vue / TypeScript / Tailwind / i18n など）の詳細は、`.cursor/rules/frontend.mdc` を優先する。
+- **`terraform/` 配下のインフラ定義**の詳細は、`.cursor/rules/terraform.mdc` を優先する。
+- **本ファイル（AGENTS.md）**は、monorepo 全体の前提、領域をまたぐ変更、検証・報告の共通方針をまとめる。内容が重なる箇所は、frontend 固有は `frontend.mdc`、terraform 固有は `terraform.mdc`、横断事項は本書を正とする。
 
 ## 参照用ソースコードの扱い
 
@@ -35,38 +33,28 @@
 - 新規実装、修正、リファクタの対象は `frontend/_reference_vue_src/` 以外の frontend 側コードとする
 - 参照元コードと移植先コードを混同しない
 - `frontend/_reference_vue_src/` のコードは、そのまま複製するのではなく、Nuxt の構成・既存設計に合わせて移植する
+- 文言の細部は `.cursor/rules/frontend.mdc` の「移植元参照コードの扱い」と整合させる
 
-## 共通ルール
+## リポジトリ横断の原則
 
-- 変更は小さく、目的に集中したものにする
-- 無関係なリファクタは行わない
-- 既存のアーキテクチャ、命名規則、ディレクトリ構成を維持する
-- 既存コードで採用されている実装パターンに合わせる
-- タスク上必要でない限り、複数領域を同時に変更しない
-- 明確な理由がない限り、新しい依存関係は追加しない
-- 挙動を変更する場合は、必要に応じて検証内容も更新する
-- API 契約を変更する場合は、frontend と backend の両方への影響を確認する
-- インフラ変更を行う場合は、Serverless Framework と Terraform の責務を混同しない
-- 現時点で存在しないディレクトリ、ファイル、コマンド、インフラ構成を前提にしない
-
-## 変更方針
-
-- 編集前に周辺コードを読むこと
-- 新しさよりも一貫性を優先する
-- 既存の utility、component、schema、helper を再利用できる場合は再利用する
-- スタイルの好みだけを理由に、動作しているコードを書き換えない
-- レビューしやすい差分にする
-- 実装コードとインフラ定義のどちらを直すべきかを先に判断する
+- 変更は小さく、目的に集中する。無関係なリファクタは行わない。
+- 既存のアーキテクチャ、命名規則、ディレクトリ構成、実装パターンに合わせる。編集前に周辺コードを読むこと。
+- タスク上必要でない限り、複数領域を同時に変更しない。明確な理由がない限り、新しい依存関係は追加しない。
+- 挙動を変更する場合は、必要に応じて検証内容や関連する型・スキーマを更新する。
+- API 契約を変更する場合は、frontend と serverless の両方への影響を確認する。
+- インフラ変更では、Serverless Framework と Terraform の責務を混同しない。実装コードとインフラ定義のどちらを直すべきかを先に判断する。
+- リポジトリに実在しないディレクトリ、ファイル、コマンド、インフラ構成を前提にしない。検証や手順を書く前に、該当ディレクトリの `package.json` の `scripts` やツール設定を確認する。
+- ディレクトリ再編、パッケージマネージャ、CI の変更などで構成が変わったら、本書・README・各 `package.json` の記述が現状と一致するよう更新する。
 
 ## 領域をまたぐ変更
 
-### frontend / backend をまたぐ場合
+### frontend / serverless をまたぐ場合
 
 - request / response の shape が整合しているか確認する
 - 必要に応じて関連する types、schemas、検証コードを更新する
-- 命名および field の使い方を frontend / backend 間で一貫させる
+- 命名および field の使い方を frontend / serverless 間で一貫させる
 
-### backend / terraform をまたぐ場合
+### serverless / terraform をまたぐ場合
 
 - 変更対象がアプリケーションコードなのか、インフラ定義なのかを明確にする
 - Serverless Framework で管理する内容と Terraform で管理する内容を混同しない
@@ -76,9 +64,10 @@
 
 作業完了前に、変更内容に応じた検証を可能な限り実施すること。
 
-- リポジトリに存在しないコマンドを前提にしない
-- 変更箇所に関係する最小限かつ適切な検証を優先する
-- 広範囲な確認が不要なら、対象を絞った検証を優先する
+- リポジトリに存在しないコマンドを前提にしない。実行前に該当パスの `package.json` の `scripts` と lockfile を確認する。
+- **frontend**: `frontend/package.json` の `scripts`（例: `pnpm run build`, `pnpm run dev`）に従い、`frontend/` をカレントディレクトリにして実行する。`pnpm-lock.yaml` があるためパッケージ操作は原則 pnpm とする（lockfile が変わる場合は既存運用に従う）。
+- **serverless / terraform**: 各サブディレクトリの `package.json`、シェルスクリプト、`README` 等に手順があればそれに従う。
+- 変更箇所に関係する最小限かつ適切な検証を優先する。広範囲な確認が不要なら、対象を絞った検証を優先する。
 
 ## 完了時の報告
 
@@ -88,10 +77,11 @@
 - 主な変更ファイル
 - 実行した検証コマンド
 - 残っている懸念点、前提、追加対応が必要な点
-- frontend / backend / terraform のどの領域を変更したか
+- frontend / serverless / terraform / `.github` のどの領域を変更したか
 
 ## 安全性とレビュー観点
 
+- 認証情報・API キー・トークン・秘密鍵をコードやコミットに埋め込まない。環境変数や `.env` の扱いは、既存のサンプル（例: `*.sample`）とチーム運用に従う。
 - 明確な理由なく重要な既存挙動を削除しない
 - 意図が不明確な場合は推測で進めず、不確実性を明記する
 - 危険な大規模変更より、戻しやすい変更を優先する
@@ -105,3 +95,4 @@
 - 提示するコードは可能な限りコピペ可能な形にする
 - 事実と推測を混同しない
 - 簡潔で実務的な説明を優先する
+- `frontend/` の変更時の補足は `.cursor/rules/frontend.mdc` の「出力方針」に合わせる

@@ -1,17 +1,3 @@
-<script setup lang="ts">
-const titleState = useTitleState()
-const { title } = titleState
-useHead({
-  title: title.value,
-  link: [
-    { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-    {
-      rel: 'stylesheet',
-      href: 'https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap'
-    }
-  ]
-})
-</script>
 <template>
   <div>
     <NuxtRouteAnnouncer />
